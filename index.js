@@ -30,6 +30,7 @@ async function run() {
 
     const menuCollection = client.db("bistrodb").collection("menu");
     const reviewsCollection=client.db('bistrodb').collection('reviews')
+    const cardCollection=client.db('bistrodb').collection('cards')
     //get for menu
     app.get('/menu',async(req,res)=>{
         const result=await menuCollection.find().toArray();
@@ -40,6 +41,14 @@ async function run() {
     const result=await reviewsCollection.find().toArray();
     res.send(result)
    })
+
+   //post when click order then its add on the cardCollection
+ app.post ('/cards',async(req,res)=>{
+  const item=req.body;
+  const result=await cardCollection.insertOne(item);
+  res.send(result);
+ })
+
 
 // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
