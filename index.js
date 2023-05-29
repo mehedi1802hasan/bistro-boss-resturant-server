@@ -1,8 +1,8 @@
 const express =require('express')
 const cors=require('cors');
 require('dotenv').config()
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const port=process.env.PORT ||3000;
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const port=process.env.PORT |5000;
 const app=express()
 //midleware
 app.use(cors())
@@ -60,7 +60,15 @@ app.get('/cards',async(req,res)=>{
   res.send(result)
  })  
 
-
+ //delete
+ app.delete('/cards/:id',async(req,res)=>{
+  const id=req.params.id;
+  const query={_id: new ObjectId (id) }
+   const result=await cardCollection.deleteOne(query);
+   res.send(result);
+ }
+ 
+ )
 // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
