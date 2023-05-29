@@ -48,6 +48,17 @@ async function run() {
   const result=await cardCollection.insertOne(item);
   res.send(result);
  })
+//get posted data email ways so its like to some get...
+app.get('/cards',async(req,res)=>{
+  const email=req.query.email;
+  console.log(email);
+  if(!email){
+    res.send([])
+  }
+  const query={email:email}
+  const result=await cardCollection.find(query).toArray();
+  res.send(result)
+ })  
 
 
 // Send a ping to confirm a successful connection
