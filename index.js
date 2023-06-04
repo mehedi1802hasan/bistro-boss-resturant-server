@@ -54,8 +54,29 @@ async function run() {
     const cardCollection=client.db('bistrodb').collection('cards')
     const usersCollection = client.db("bistrodb").collection("users");
 
+    // WARNING: use verifyJWT before using verifyAdmin
+    const verifyAdmin = async (req,res,next)=>{
+      const email =req.decoded.email;
+      const query ={ email: email};
+      const user = await usersCollection.findOne(query);
+      if(user?.role !== 'admin'){
+        return res.status(403).send({error: true, message: 'forbiden message'});
+
+      }
+      next();
+
+    }
+
+
+    /**
+     * 0 . DO NOT SHOW SECURE LINKS TO THOSE  WHO SHOULD NOT SEE THE LINKS
+     * 1. USE JWT TOKEN : verfyJWT;
+     * 2. USE VerifyAdmin MIDDLEWARE
+     */
+
+
     // User-related APIs
-    app.get('/users',async(req,res)=>{
+    app.get('/users',verifiJWT,verifyAdmin,async(req,res)=>{
       const result=await usersCollection.find().toArray();
       res.send(result)
     })
