@@ -2,11 +2,32 @@ const express =require('express')
 const cors=require('cors');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const port=process.env.PORT |3000;
+const jwt = require('jsonwebtoken');
+
+const port=process.env.PORT || 3000;
 const app=express()
 //midleware
 app.use(cors())
 app.use(express.json())
+
+//jwt-- verify
+const verifiJWT=(req,res,next)=>{
+  const authorization =req.headers.authorization;
+  if(!authorization){
+    return res.status(401).send({error: true, message:'unauthorized access'});
+
+  }
+  //JWT--bearer token
+   const token= authorization.split(' ')[1];
+   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err,decoded)=>{
+    if(err){
+      return res.status(401).send({erro: true , message:' unathorized acess'})
+    }
+    req.decoded = decoded;
+    next()
+   })
+}
+
 
 //mongodb connection
 console.log(process.env.DB_USER)
@@ -51,6 +72,22 @@ async function run() {
       res.send(result);
     });
 
+    //security layer: verifyJWT
+    // email same;
+    //check admin
+
+    app.get('/users/admin/:email',verifiJWT,async(req,res)=>{
+      const email = req.params.email;
+      if(req.decoded.email !== email){
+        res.send({admin : false})
+      }
+      const query = { email: email};
+      const user = await usersCollection.findOne(query);
+      const result = { admin: user?.role === 'admin'};
+      res.send(result);
+    })
+
+
     app.patch('/users/admin/:id',async(req,res)=>{
       const id=req.params.id;
       const filter ={_id : new ObjectId(id)};
@@ -80,9 +117,13 @@ async function run() {
   res.send(result);
  })
 //get posted data email ways so its like to some get...
-app.get('/cards',async(req,res)=>{
+app.get('/cards',verifiJWT,async(req,res)=>{
   const email=req.query.email;
   console.log(email);
+  const decodedEmail= req.decoded.email;
+  if(email !== decodedEmail){
+    return res.status(403).send({error: true, message:'forbiden access'});
+  }
   if(!email){
     res.send([])
   }
@@ -100,6 +141,17 @@ app.get('/cards',async(req,res)=>{
  }
  
  )
+ // JWT-- security 
+app.post('/jwt',(req,res)=>{
+  const user=req.body;
+  console.log(user);
+   const token=jwt.sign(user,process.env.ACCESS_TOKEN_SECRET,{
+    expiresIn:'1h'
+   });
+   console.log(token);
+   res.send({token})
+})
+
 // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
