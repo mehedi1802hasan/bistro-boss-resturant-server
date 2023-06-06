@@ -125,6 +125,14 @@ async function run() {
         const result=await menuCollection.find().toArray();
         res.send(result)
     })
+
+    //additem by imagebb
+    app.post('/menu',async(req,res)=>{
+      const newItem = req.body;
+      const result = await menuCollection.insertOne(newItem);
+      res.send(result);
+    })
+
 //get for reviews
    app.get('/review',async(req,res)=>{
     const result=await reviewsCollection.find().toArray();
