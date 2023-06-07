@@ -127,11 +127,19 @@ async function run() {
     })
 
     //additem by imagebb
-    app.post('/menu',async(req,res)=>{
+    app.post('/menu',verifiJWT,verifyAdmin,async(req,res)=>{
       const newItem = req.body;
       const result = await menuCollection.insertOne(newItem);
       res.send(result);
     })
+
+     // manage item for delete menu items
+ app.delete ('/menu/:id',verifiJWT,verifyAdmin,async(req,res)=>{
+  const id =req.params.id;
+  const query ={_id : new ObjectId (id)};
+  const result =await menuCollection.deleteOne(query);
+  res.send(result)
+ })
 
 //get for reviews
    app.get('/review',async(req,res)=>{
