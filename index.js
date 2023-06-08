@@ -54,7 +54,7 @@ async function run() {
     const reviewsCollection = client.db('bistrodb').collection('reviews')
     const cardCollection = client.db('bistrodb').collection('cards')
     const usersCollection = client.db("bistrodb").collection("users");
-
+    const paymentCollection= client.db('bistrodb').collection('payments')
     // WARNING: use verifyJWT before using verifyAdmin
     const verifyAdmin = async (req, res, next) => {
       const email = req.decoded.email;
@@ -190,7 +190,7 @@ async function run() {
       res.send({ token })
     })
 ///
-///Payment 
+///Payment  intent
 app.post('/create-payment-intent',verifiJWT,async(req,res)=>{
   const {price}=req.body;
   const amount= price * 100;
@@ -204,6 +204,13 @@ app.post('/create-payment-intent',verifiJWT,async(req,res)=>{
     clientSecret: paymentIntent.client_secret
   })
 });
+
+//payment releted api
+app.post ('/payments',verifiJWT ,async(req,res)=>{
+  const payment= req.body;
+  const result = await paymentCollection.insertOne(payment);
+  res.send(result)
+})
 
 
 
